@@ -33,28 +33,44 @@ class NeuralNetwork:
         """ 
         cli_args = _cfg(cli_args)
         self.cfg_args = cli_args
+
+        config = cli_args.get("config_path", None)
+        if config:
+            self.input_size = config.get("input_size", 784)
+            self.output_size = config.get("output_size", 10)
+            self.init_method = config.get("weight_init", "xavier")
+            self.activation_type = config.get("activation", "relu")
+            self.loss_name = config.get("loss", "cross_entropy")
+            self.optimizer = config.get("optimizer", "sgd")
+            self.learning_rate = config.get("learning_rate", 0.01)
+            self.weight_decay = config.get("weight_decay", 0.0)
+            self.hidden_size = config.get("hidden_size", [64])
+            self.num_layers = config.get("num_layers", 1)
+            self.batch_size = config.get("batch_size", 128)
+            self.dataset_name = config.get("dataset", "mnist")
+
         hidden_size = cli_args.get(
             "hidden_size",
-            cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", [64]))),
+            cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", self.hidden_size))),
         )
         if isinstance(hidden_size, int):
             hidden_size = [hidden_size]
         if hidden_size is None or len(hidden_size) == 0:
             hidden_size = []
 
-        self.input_size = int(cli_args.get("input_size", 784))
-        self.output_size = int(cli_args.get("output_size", 10))
-        self.init_method = cli_args.get("weight_init", cli_args.get("init_method", "xavier"))
-        self.activation_type = cli_args.get("activation", "relu")
-        self.loss_name = cli_args.get("loss", cli_args.get("loss_fn", "cross_entropy"))
-        self.dataset_name = cli_args.get("dataset", "mnist")
+        self.input_size = int(cli_args.get("input_size", self.input_size))
+        self.output_size = int(cli_args.get("output_size", self.output_size))
+        self.init_method = cli_args.get("weight_init", cli_args.get("init_method", self.init_method))
+        self.activation_type = cli_args.get("activation", self.activation_type)
+        self.loss_name = cli_args.get("loss", cli_args.get("loss_fn", self.loss_name))
+        self.dataset_name = cli_args.get("dataset", self.dataset_name)
 
-        opt_cfg = cli_args.get("optimizer", "sgd")
+        opt_cfg = cli_args.get("optimizer", self.optimizer)
         if isinstance(opt_cfg, str):
             self.optimizer = get_optimiser(
                 opt_cfg,
-                learning_rate=cli_args.get("learning_rate", 0.01),
-                weight_decay=cli_args.get("weight_decay", 0.0),
+                learning_rate=cli_args.get("learning_rate", self.learning_rate),
+                weight_decay=cli_args.get("weight_decay", self.weight_decay),
             )
         else:
             self.optimizer = opt_cfg

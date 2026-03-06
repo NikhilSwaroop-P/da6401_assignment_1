@@ -75,7 +75,7 @@ def main():
     TODO: Must return Dictionary - logits, loss, accuracy, f1, precision, recall
     """
     args = parse_arguments()
-    raise ValueError(f"Error in setting weights\nModel Config: {args}")
+    # raise ValueError(f"Error in setting weights\nModel Config: {args}")
     # Load dataset
     _, _, X_test, y_test = load_data(args.dataset)
 
