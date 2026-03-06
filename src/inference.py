@@ -83,11 +83,17 @@ def main():
     weights = load_model(args.model_path)
 
     # Load config JSON (dictionary with keys: hidden_size, activation, loss, weight_init, etc.)
+    hidden_size = []
     with open(args.config_path, "r") as f:
         config = json.load(f)
-
+    for key in weights:
+        if key[0] == 'b':
+            hidden_size.append((int(key[1:]),weights[key].shape[0]))
+    hidden_size.sort()
+    hidden_size = [h[1] for h in hidden_size]
+    print(hidden_size)
     model_cfg = {
-    "hidden_size": config.get("hidden_size", []),
+    "hidden_size": hidden_size,
     "activation": config.get("activation", "relu"),
     "loss": config.get("loss", "cross_entropy"),
     "weight_init": config.get("weight_init", "xavier"),
