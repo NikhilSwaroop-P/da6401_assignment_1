@@ -60,7 +60,6 @@ def main():
     Main training function.
     """
     best_f1 = -1
-    raise ValueError(f"Error in setting weights\nModel Config: {args}")
     args = parse_arguments()
     optimizer_name = args.optimizer
     if args.num_layers != len(args.hidden_size):

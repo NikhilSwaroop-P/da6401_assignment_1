@@ -34,8 +34,10 @@ class NeuralNetwork:
         cli_args = _cfg(cli_args)
         self.cfg_args = cli_args
 
-        config = cli_args.get("config_path", None)
-        if config:
+        config_path = cli_args.get("config_path", None)
+        if config_path:
+            with open(config_path, "r") as f:
+                config = json.load(f)
             self.input_size = config.get("input_size", 784)
             self.output_size = config.get("output_size", 10)
             self.init_method = config.get("weight_init", "xavier")
@@ -44,14 +46,14 @@ class NeuralNetwork:
             self.optimizer = config.get("optimizer", "sgd")
             self.learning_rate = config.get("learning_rate", 0.01)
             self.weight_decay = config.get("weight_decay", 0.0)
-            self.hidden_size = config.get("hidden_size", [64])
+            hidden_size = config.get("hidden_size", [64])
             self.num_layers = config.get("num_layers", 1)
             self.batch_size = config.get("batch_size", 128)
             self.dataset_name = config.get("dataset", "mnist")
 
         hidden_size = cli_args.get(
             "hidden_size",
-            cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", self.hidden_size))),
+            cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", hidden_size))),
         )
         if isinstance(hidden_size, int):
             hidden_size = [hidden_size]
