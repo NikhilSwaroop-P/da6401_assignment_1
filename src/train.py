@@ -83,10 +83,10 @@ def main():
     model = NeuralNetwork(args)
     print("Starting training...")
     model.train(X_train, y_train, args.epochs, args.batch_size)
-    y_train_labels = np.argmax(y_train, axis=1)  # Convert one-hot to class labels
 
-    train_acc, train_f1 = model.evaluate(X_train, y_train)
-    test_acc, test_f1 = model.evaluate(X_test, y_test)
+    # train_acc, train_f1 = model.evaluate(X_train, y_train)
+    # test_acc, test_f1 = model.evaluate(X_test, y_test)
+    test_f1 = 0
     if test_f1 > best_f1:
         best_f1 = test_f1
         model_data = {
@@ -96,7 +96,7 @@ def main():
                 "activation": args.activation,
                 "loss": args.loss,
                 "weight_init": args.weight_init,
-                "optimizer": args.optimizer.__class__.__name__ if args.optimizer is not None else None,
+                "optimizer": parse_arguments().optimizer,
                 "learning_rate": args.learning_rate,
                 "num_layers": args.num_layers,
                 "batch_size": args.batch_size,

@@ -2,7 +2,6 @@
 Optimization Algorithms
 Implements: SGD, Momentum, Adam, Nadam, etc.
 """
-from matplotlib.pyplot import cla
 import numpy as np
 
 class SGD:
@@ -11,8 +10,8 @@ class SGD:
         self.weight_decay = weight_decay
 
     def step(self, weights, gradients):
+        gradients = gradients + self.weight_decay * weights
         weights -= self.learning_rate * gradients
-        weights -= self.weight_decay * weights
 
 
 class Momentum:
@@ -27,7 +26,7 @@ class Momentum:
             self.v = np.zeros_like(weights)
         self.v = self.momentum * self.v + self.learning_rate * gradients
         weights -= self.v
-        weights -= self.weight_decay * weights
+        weights -= self.weight_decay * weights*self.learning_rate
 
 class NAG:
     '''
@@ -52,7 +51,7 @@ class NAG:
         
         self.v = self.momentum * self.v + self.learning_rate * new_gradients
         weights -= self.v
-        weights -= self.weight_decay * weights
+        weights -= self.weight_decay * weights*self.learning_rate
 
     def compute_lookahead(self, copy_weights, gradients):
             if self.v is None:
@@ -73,8 +72,8 @@ class RMSProp:
             self.s = np.zeros_like(weights)
         self.s = self.beta * self.s + (1 - self.beta) * np.square(gradients)
         weights -= self.learning_rate * gradients / (np.sqrt(self.s) + self.epsilon)
-        weights -= self.weight_decay * weights
-    
+        weights -= self.weight_decay * weights * self.learning_rate
+
 class Adam:
     def __init__(self, learning_rate=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.0):
         self.learning_rate = learning_rate
@@ -96,7 +95,7 @@ class Adam:
         m_hat = self.m / (1 - self.beta1) #corrected momentum
         v_hat = self.v / (1 - self.beta2) #corrected RMSProp
         weights -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon) #Adam
-        weights -= self.weight_decay * weights
+        weights -= self.weight_decay * weights * self.learning_rate
 
 class Nadam:
     def __init__(self, learning_rate=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.0):
@@ -124,7 +123,7 @@ class Nadam:
         m_nestrov = self.beta1 * m_hat + (1 - self.beta1) * (gradients)/(1- self.beta1**self.t)
 
         weights -= (self.learning_rate * m_nestrov) / (np.sqrt(v_hat) + self.epsilon)
-        weights -= self.weight_decay * weights
+        weights -= self.weight_decay * weights * self.learning_rate
 
 def get_optimiser(optimiser_type, learning_rate=0.01, beta1=0.9, beta2=0.999, epsilon=1e-8, weight_decay=0.0):
     if optimiser_type == 'sgd':
