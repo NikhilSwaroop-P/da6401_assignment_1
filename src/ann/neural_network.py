@@ -230,7 +230,7 @@ class NeuralNetwork:
                     layer.b[:] = incoming_b.reshape(layer.b.shape).copy()
                 else:
                     raise ValueError(
-                        f"Unexpected shape for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}"
+                        f"Unexpected for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}"
                     )
 
             if w_key in weight_dict:
