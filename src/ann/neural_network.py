@@ -10,6 +10,9 @@ from .activations import get_activation
 import numpy as np
 from .objective_functions import CrossEntropyLoss, MSELoss
 
+def _cfg(cli_args):
+    return cli_args if isinstance(cli_args, dict) else vars(cli_args)
+
 class NeuralNetwork:
     """
     Main model class that orchestrates the neural network training and inference.
@@ -22,19 +25,30 @@ class NeuralNetwork:
         Args:
             cli_args: Command-line arguments for configuring the network
         """ 
-        hidden_size = cli_args.get('hidden_layers', [64])
-        num_layers = len(hidden_size) + 1
-        self.input_size = cli_args.get('input_size', 784)
-        self.output_size = cli_args.get('output_size', 10)
-        self.init_method = cli_args.get('init_method', 'xavier')
-        self.activation_type = cli_args.get('activation', 'relu')
-        self.loss_fn = cli_args.get('loss_fn', 'cross_entropy')
-        self.optimizer_type = cli_args.get('optimizer', 'sgd')
-        self.dataset_name = cli_args.get('dataset', 'mnist')
-        self.optimizer = get_optimiser(self.optimizer_type)
+        cli_args = _cfg(cli_args)
+
+        hidden_size = cli_args.get("hidden_size", cli_args.get("hidden_layers", [64]))
+        self.input_size = cli_args.get("input_size", 784)
+        self.output_size = cli_args.get("output_size", 10)
+        self.init_method = cli_args.get("weight_init", cli_args.get("init_method", "xavier"))
+        self.activation_type = cli_args.get("activation", "relu")
+        self.loss_fn = cli_args.get("loss", cli_args.get("loss_fn", "cross_entropy"))
+        self.dataset_name = cli_args.get("dataset", "mnist")
+
+        opt_cfg = cli_args.get("optimizer", "sgd")
+        if isinstance(opt_cfg, str):
+            self.optimizer = get_optimiser(
+                opt_cfg,
+                learning_rate=cli_args.get("learning_rate", 0.01),
+                weight_decay=cli_args.get("weight_decay", 0.0),
+            )
+        else:
+            self.optimizer = opt_cfg
+
         self.layers = []
         self.full_layers = []
         total_params = 0
+        num_layers = len(hidden_size)
         for i in range(1, len(hidden_size)):
             total_params += hidden_size[i] * hidden_size[i-1] + hidden_size[i]
         total_params += self.output_size * hidden_size[num_layers-1] + self.output_size + self.input_size * hidden_size[0] + hidden_size[0]
@@ -49,21 +63,21 @@ class NeuralNetwork:
         else:
             raise ValueError('Invalid loss function')
 
-        if num_layers > 0:
-            self.full_layers.append(NeuralLayer(self.input_size, hidden_size[0], self.init_method))
-            self.layers.append(self.full_layers[-1])
+        self.layers = []
+        self.full_layers = []
+
+        prev_dim = self.input_size
+        for h in hidden_size:
+            dense = NeuralLayer(prev_dim, h, self.init_method)
+            self.full_layers.append(dense)
+            self.layers.append(dense)
             self.full_layers.append(get_activation(self.activation_type))
-            for i in range(1, num_layers):
-                self.full_layers.append(NeuralLayer(hidden_size[i-1], hidden_size[i], self.init_method))
-                self.full_layers.append(get_activation(self.activation_type))
-                self.layers.append(self.full_layers[-2])
-            self.full_layers.append(NeuralLayer(hidden_size[num_layers-1], self.output_size, self.init_method))
-            # self.full_layers.append(get_activation('softmax'))
-            self.layers.append(self.full_layers[-1])
-        else:
-            self.full_layers.append(NeuralLayer(self.input_size, self.output_size, self.init_method))
-            # self.full_layers.append(get_activation('softmax'))
-            self.layers.append(self.full_layers[-1])
+            prev_dim = h
+
+        out_dense = NeuralLayer(prev_dim, self.output_size, self.init_method)
+        self.full_layers.append(out_dense)
+        self.layers.append(out_dense)
+
         self._assign_global_params()
         self.past_input = None
         self.ytrue = None
@@ -115,8 +129,8 @@ class NeuralNetwork:
         for i , (gw, gb) in enumerate(zip(grad_W_list, grad_b_list)):
             self.grad_W[i] = gw
             self.grad_b[i] = gb
-        print("Shape of grad_Ws:", self.grad_W.shape, self.grad_W[1].shape)
-        print("Shape of grad_bs:", self.grad_b.shape, self.grad_b[1].shape)
+        # print("Shape of grad_Ws:", self.grad_W.shape, self.grad_W[1].shape)
+        # print("Shape of grad_bs:", self.grad_b.shape, self.grad_b[1].shape)
         return self.grad_W, self.grad_b
 
     def update_weights(self):
@@ -140,22 +154,32 @@ class NeuralNetwork:
         num_samples = X_train.shape[0]
         for epoch in range(epochs):
             print(f"Epoch {epoch+1}/{epochs}")
+            loss_epoch = 0.0
             for i in range(0, num_samples, batch_size):
                 batch_X = X_train[i:i+batch_size]
                 batch_y = y_train[i:i+batch_size]
                 y_pred = self.forward(batch_X)
+                loss = self.loss_fn.forward(batch_y, y_pred)
+                loss_epoch += loss
                 self.backward(batch_y, y_pred)
                 self.update_weights()
+            loss_epoch /= (num_samples / batch_size)
             
-    
+            print(f"Loss for epoch {epoch+1}: {loss_epoch}")
+
     def evaluate(self, X, y):
         """
-        Evaluate the network on given data.
+        Evaluate the network on given data. return accuracy, and f1 score
         """
-        y_pred = self.forward(X)
-        loss = self.loss_fn.forward(y, y_pred)
-        return loss
-
+        y_pred_logits = self.forward(X)
+        loss = self.loss_fn.forward(y, y_pred_logits)
+        # Compute accuracy and F1 score (implementation depends on specific requirements)
+        y_pred = np.argmax(y_pred_logits, axis=1)
+        y_true = np.argmax(y, axis=1)
+        accuracy = np.mean(y_pred == y_true)
+        from sklearn.metrics import f1_score
+        f1 = f1_score(y_true, y_pred, average='macro')
+        return accuracy, f1
     def _assign_global_params(self):
         idx = 0
         for layer in self.full_layers:

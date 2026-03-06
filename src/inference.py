@@ -2,14 +2,21 @@
 Inference Script
 Evaluate trained models on test sets
 """
+import os
+import sys
+
+this = os.path.dirname(os.path.abspath(__file__))
+thisF = os.path.dirname(this)
+project_root = os.path.dirname(thisF)
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
 import argparse
+import json
 import numpy as np
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score ,confusion_matrix
-import wandb
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from utils.data_loader import load_data
 from ann.neural_network import NeuralNetwork
-from ann.optimizers import SGD
-import json
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run inference on test set')
@@ -41,14 +48,14 @@ def evaluate_model(model, X_test, y_test):
     TODO: Return Dictionary - logits, loss, accuracy, f1, precision, recall
     """
     logits = model.forward(X_test)
-    
+
     exp = np.exp(logits - np.max(logits, axis=1, keepdims=True))
     probs = exp / np.sum(exp, axis=1, keepdims=True)
 
-    y_pred = np.argmax(probs, axis=1)
-    y_true = np.argmax(y_test, axis=1)
+    y_pred = np.argmax(probs, axis=1).reshape(-1)
+    y_true = np.argmax(y_test, axis=1).reshape(-1)
 
-    loss = model.loss.forward(logits, y_test)
+    loss = model.loss_fn.forward(y_test, logits)
 
     accuracy = accuracy_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred, average="macro")
@@ -85,24 +92,16 @@ def main():
     with open(args.config_path, "r") as f:
         config = json.load(f)
 
-    # Build a small cli-like object expected by NeuralNetwork
-    class DummyArgs:
-        pass
-
-    cli = DummyArgs()
-    # map config keys to the cli object used by NeuralNetwork
-    # Accept both 'hidden_size' or maybe 'hidden_sizes' inside config
-    cli.hidden_size = config.get("hidden_size", config.get("hidden_sizes", config.get("sz", [])))
-    cli.activation = config.get("activation", "relu")
-    cli.loss = config.get("loss", "cross_entropy")
-    cli.weight_init = config.get("weight_init", "random")
-    cli.num_layers = config.get("num_layers", len(cli.hidden_size) if cli.hidden_size else 0)
-    cli.batch_size = config.get("batch_size", args.batch_size)
-    # optimizer not needed for inference, but NeuralNetwork expects an attribute
-    cli.optimizer = None
-
-    # Initialize model and set weights
-    model = NeuralNetwork(cli)
+    model_cfg = {
+    "hidden_size": config.get("hidden_size", []),
+    "activation": config.get("activation", "relu"),
+    "loss": config.get("loss", "cross_entropy"),
+    "weight_init": config.get("weight_init", "xavier"),
+    "input_size": X_test.shape[1],
+    "output_size": y_test.shape[1],
+    "optimizer": None,
+}
+    model = NeuralNetwork(model_cfg)
     model.set_weights(weights)
 
     # Evaluate

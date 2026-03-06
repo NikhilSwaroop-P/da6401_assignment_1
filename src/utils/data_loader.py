@@ -44,3 +44,21 @@ class Dataloader:
             batch_x = self.x_test[batch_indices]
             batch_y = self.y_test[batch_indices]
             yield batch_x, batch_y
+
+def _one_hot(y, num_classes=10):
+    oh = np.zeros((y.shape[0], num_classes), dtype=np.float32)
+    oh[np.arange(y.shape[0]), y] = 1.0
+    return oh
+
+def load_data(dataset_name):
+    if dataset_name == "mnist":
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    elif dataset_name == "fashion_mnist":
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+    else:
+        raise ValueError("Invalid dataset name")
+    x_train = x_train.astype(np.float32).reshape(x_train.shape[0], -1, 1) / 255.0
+    x_test = x_test.astype(np.float32).reshape(x_test.shape[0], -1, 1) / 255.0
+    y_train = _one_hot(y_train).reshape(y_train.shape[0], 10, 1)
+    y_test = _one_hot(y_test).reshape(y_test.shape[0], 10, 1)
+    return x_train, y_train, x_test, y_test
