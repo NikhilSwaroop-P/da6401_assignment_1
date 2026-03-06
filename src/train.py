@@ -102,10 +102,10 @@ def main():
                 "learning_rate": args.learning_rate,
                 "num_layers": args.num_layers,
                 "batch_size": args.batch_size,
-                'train_accuracy': train_acc,
-                'train_f1': train_f1,
-                'test_accuracy': test_acc,
-                'test_f1': test_f1
+                # 'train_accuracy': train_acc,
+                # 'train_f1': train_f1,
+                # 'test_accuracy': test_acc,
+                # 'test_f1': test_f1
             }
         }
         np.save("best_model.npy", model_data["weights"])

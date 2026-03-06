@@ -226,6 +226,8 @@ class NeuralNetwork:
         for i, layer in enumerate(self.layers):
             w_key = f"W{i}"
             b_key = f"b{i}"
+            if b_key in weight_dict:
+                layer.b[:] = weight_dict[b_key].copy()
             if w_key in weight_dict:
                 incoming_w = weight_dict[w_key]
                 if incoming_w.shape == layer.W.shape:
