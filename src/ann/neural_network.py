@@ -33,7 +33,12 @@ class NeuralNetwork:
         """ 
         cli_args = _cfg(cli_args)
 
-        hidden_size = cli_args.get("hidden_size", cli_args.get("hidden_layers", [64]))
+        hidden_size = cli_args.get(
+            "hidden_size",
+            cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", [64]))),
+        )
+        if isinstance(hidden_size, int):
+            hidden_size = [hidden_size]
         if hidden_size is None or len(hidden_size) == 0:
             hidden_size = []
 

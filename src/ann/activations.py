@@ -55,7 +55,9 @@ class Softmax(Activation_base):
     
     def forward(self, x):
         self.x = x
-        self.output = np.exp(x) / np.sum(np.exp(x), axis=1, keepdims=True)
+        shifted = x - np.max(x, axis=1, keepdims=True)
+        exp_x = np.exp(shifted)
+        self.output = exp_x / np.sum(exp_x, axis=1, keepdims=True)
         return self.output
     
     def backward(self, grad_output):

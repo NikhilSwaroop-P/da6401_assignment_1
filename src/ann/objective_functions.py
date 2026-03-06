@@ -24,11 +24,11 @@ class CrossEntropyLoss:
         return -np.mean(y_true * np.log(y_pred + 1e-12))
     
     def backward(self, y_true, y_pred_logits):
-        # Apply softmax to logits
         y_pred = self.softmax.forward(y_pred_logits)
         self.y_pred = y_pred
-        goutput = (-y_true / (y_pred + 1e-12)) / y_true.size
-        return self.softmax.backward(goutput)
+        safe_y_pred = np.clip(y_pred, 1e-12, 1.0)
+        grad_from_loss = (-y_true / safe_y_pred) / y_true.size
+        return self.softmax.backward(grad_from_loss)
 
 class MSELoss:
     def __init__(self):
