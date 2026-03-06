@@ -32,7 +32,7 @@ class NeuralNetwork:
             cli_args: Command-line arguments for configuring the network
         """ 
         cli_args = _cfg(cli_args)
-
+        self.cfg_args = cli_args
         hidden_size = cli_args.get(
             "hidden_size",
             cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", [64]))),
@@ -235,7 +235,7 @@ class NeuralNetwork:
                     layer.b[:] = incoming_b.reshape(layer.b.shape).copy()
                 else:
                     raise ValueError(
-                        f"Unexpected for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}"
+                        f"Unexpected for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}, cli_args{self.cfg_args}"
                     )
 
             if w_key in weight_dict:
