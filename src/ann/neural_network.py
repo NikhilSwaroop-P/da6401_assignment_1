@@ -160,6 +160,9 @@ class NeuralNetwork:
             if isinstance(layer, NeuralLayer):
                 grad_W_list.append(layer.grad_W)
                 grad_b_list.append(layer.grad_b)
+        # Backprop traverses layers in reverse; return grads in forward layer order (W0, W1, ...)
+        grad_W_list.reverse()
+        grad_b_list.reverse()
         # return [layer.grad_W for layer in self.full_layers if isinstance(layer, NeuralLayer)], [layer.grad_b for layer in self.full_layers if isinstance(layer, NeuralLayer)]
         
         self.grad_W = np.empty(len(grad_W_list), dtype=object)
@@ -246,8 +249,8 @@ class NeuralNetwork:
     def get_weights(self):
         d = {}
         for i, layer in enumerate(self.layers):
-            d[f"W{i}"] = layer.W.T.copy()
-            d[f"b{i}"] = layer.b.T.copy()
+            d[f"W{i}"] = layer.W.copy()
+            d[f"b{i}"] = layer.b.copy()
         return d
 
     def set_weights(self, weight_dict):
