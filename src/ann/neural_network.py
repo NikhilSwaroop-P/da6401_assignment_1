@@ -15,7 +15,7 @@ except Exception:
 from .neural_layer import NeuralLayer
 from .activations import get_activation
 from .objective_functions import CrossEntropyLoss, MSELoss
-
+import json
 def _cfg(cli_args):
     return cli_args if isinstance(cli_args, dict) else vars(cli_args)
 
@@ -50,7 +50,19 @@ class NeuralNetwork:
             self.num_layers = config.get("num_layers", 1)
             self.batch_size = config.get("batch_size", 128)
             self.dataset_name = config.get("dataset", "mnist")
-
+        else:
+            hidden_size = []
+            self.input_size = 784
+            self.output_size = 10
+            self.init_method = "xavier"
+            self.activation_type = "relu"
+            self.loss_name = "cross_entropy"
+            self.optimizer = "sgd"
+            self.learning_rate = 0.01
+            self.weight_decay = 0.0
+            self.num_layers = 1
+            self.batch_size = 128
+            self.dataset_name = "mnist"
         hidden_size = cli_args.get(
             "hidden_size",
             cli_args.get("hidden_sizes", cli_args.get("sz", cli_args.get("hidden_layers", hidden_size))),
