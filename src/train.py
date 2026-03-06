@@ -79,7 +79,7 @@ def main():
         
     args.optimizer = optimizer
     args.hidden_size = args.hidden_size
-    args.hidden_sizes = args.hidden_size if hasattr(args,"hidden_size") else args.sz
+    # args.hidden_sizes = args.hidden_size if hasattr(args,"hidden_size") else args.sz
     model = NeuralNetwork(args)
     print("Starting training...")
     model.train(X_train, y_train, args.epochs, args.batch_size)
@@ -87,6 +87,7 @@ def main():
     # train_acc, train_f1 = model.evaluate(X_train, y_train)
     # test_acc, test_f1 = model.evaluate(X_test, y_test)
     test_f1 = 0
+    optimizer_name = args.optimizer
     if test_f1 > best_f1:
         best_f1 = test_f1
         model_data = {
@@ -96,7 +97,7 @@ def main():
                 "activation": args.activation,
                 "loss": args.loss,
                 "weight_init": args.weight_init,
-                "optimizer": parse_arguments().optimizer,
+                "optimizer": optimizer_name,
                 "learning_rate": args.learning_rate,
                 "num_layers": args.num_layers,
                 "batch_size": args.batch_size,
@@ -106,10 +107,12 @@ def main():
                 # 'test_f1': test_f1
             }
         }
-        np.save("best_model.npy", model_data["weights"])
+    src_dir = os.path.dirname(os.path.abspath(__file__))
 
-        with open("best_config.json", "w") as f:
-            json.dump(model_data["config"], f)
+    np.save(os.path.join(src_dir, "best_model.npy"), model_data["weights"])
+
+    with open(os.path.join(src_dir, "best_config.json"), "w") as f:
+        json.dump(model_data["config"], f)
 
       
     print("Training complete!")

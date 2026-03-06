@@ -212,7 +212,7 @@ class NeuralNetwork:
         d = {}
         for i, layer in enumerate(self.layers):
             d[f"W{i}"] = layer.W.T.copy()
-            d[f"b{i}"] = layer.b.copy()
+            d[f"b{i}"] = layer.b.T.copy()
         return d
 
     def set_weights(self, weight_dict):
@@ -224,11 +224,13 @@ class NeuralNetwork:
                 incoming_b = weight_dict[b_key]
                 if incoming_b.shape == layer.b.shape:
                     layer.b[:] = incoming_b.copy()
+                elif incoming_b.shape == layer.b.T.shape:
+                    layer.b[:] = incoming_b.T.copy()
                 elif incoming_b.shape == layer.b.reshape(-1).shape:
                     layer.b[:] = incoming_b.reshape(layer.b.shape).copy()
                 else:
                     raise ValueError(
-                        f"Unexpected shape for {b_key}: {incoming_b.shape}, expected {layer.b.shape}"
+                        f"Unexpected shape for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}"
                     )
 
             if w_key in weight_dict:
