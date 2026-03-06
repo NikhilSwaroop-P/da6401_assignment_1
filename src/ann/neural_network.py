@@ -2,8 +2,8 @@
 Main Neural Network Model class
 Handles forward and backward propagation loops
 """
-from da6401_assignment_1.src.ann.optimizers import NAG, get_optimiser
-from da6401_assignment_1.src.utils.data_loader import Dataloader
+from ann.optimizers import NAG, get_optimiser
+from utils.data_loader import Dataloader
 
 from .neural_layer import NeuralLayer
 from .activations import get_activation
