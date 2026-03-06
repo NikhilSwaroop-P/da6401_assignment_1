@@ -1,0 +1,13 @@
+{
+  "os":  "Linux-6.14.0-116036-tuxedo-x86_64-with-glibc2.39",
+  "python":  "CPython 3.12.3",
+  "startedAt":  "2026-02-20T14:19:27.257433Z",
+  "program":  "/home/crimson/Projects/Acads/DL/A1/da6401_assignment_1/notebooks/wandb_demo.ipynb",
+  "codePath":  "/home/crimson/Projects/Acads/DL/A1/da6401_assignment_1/notebooks/wandb_demo.ipynb",
+  "codePathLocal":  "wandb_demo.ipynb",
+  "email":  "ee23b055@smail.iitm.ac.in",
+  "root":  "/home/crimson/Projects/Acads/DL/A1/da6401_assignment_1/notebooks",
+  "host":  "tuxedo-os",
+  "executable":  "/home/crimson/Projects/Acads/DL/A1/.venv/bin/python",
+  "writerId":  "f7b266pdesf6wwt9lkoo0njg8uhevfao"
+}

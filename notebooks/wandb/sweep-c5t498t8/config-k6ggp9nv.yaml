@@ -1,0 +1,10 @@
+wandb_version: 1
+
+epochs:
+  value: 50
+learning_rate:
+  value: 0.05
+loss_type:
+  value: mse
+weight_init:
+  value: xavier
