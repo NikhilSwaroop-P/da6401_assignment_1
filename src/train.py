@@ -3,7 +3,6 @@ Main Training Script
 Entry point for training neural networks with command-line arguments
 """
 
-from html import parser
 import os
 import sys
 
@@ -16,7 +15,6 @@ if project_root not in sys.path:
 import argparse
 import json
 import numpy as np
-from sklearn.metrics import f1_score
 from utils.data_loader import load_data
 from ann.neural_network import NeuralNetwork
 from ann.optimizers import SGD, RMSProp, Momentum, NAG
