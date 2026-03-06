@@ -61,6 +61,7 @@ def main():
     """
     best_f1 = -1
     args = parse_arguments()
+    optimizer_name = args.optimizer
     if args.num_layers != len(args.hidden_size):
         raise ValueError("num_layers must match length of hidden_size list")
     
@@ -87,7 +88,6 @@ def main():
     # train_acc, train_f1 = model.evaluate(X_train, y_train)
     # test_acc, test_f1 = model.evaluate(X_test, y_test)
     test_f1 = 0
-    optimizer_name = args.optimizer
     if test_f1 > best_f1:
         best_f1 = test_f1
         model_data = {

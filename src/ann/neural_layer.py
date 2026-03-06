@@ -23,13 +23,38 @@ class NeuralLayer:
             raise ValueError("Invalid initialization method")
 
     def forward(self, x):
-        self.x = x
-        self.z = self.W @ x + self.b
-        return self.z
+        self.input_ndim = x.ndim
+
+        if x.ndim == 3:
+            self.x = x
+            self.z = self.W @ x + self.b
+            return self.z
+
+        if x.ndim == 2:
+            if x.shape[1] == self.input_size:
+                self.x = x
+                self.z = x @ self.W.T + self.b.T
+                return self.z
+            if x.shape == (self.input_size, 1):
+                self.x = x.reshape(1, self.input_size, 1)
+                self.z = self.W @ self.x + self.b
+                return self.z.reshape(1, self.output_size)
+
+        raise ValueError(f"Unexpected input shape for layer: {x.shape}")
 
     def backward(self, grad_output):
-        self.grad_W[:] = np.sum(grad_output @ self.x.transpose(0, 2, 1), axis=0)
-        self.grad_b[:] = np.sum(grad_output, axis=0)
-        return self.W.T @ grad_output
+        if self.input_ndim == 3:
+            self.grad_W[:] = np.sum(grad_output @ self.x.transpose(0, 2, 1), axis=0)
+            self.grad_b[:] = np.sum(grad_output, axis=0)
+            return self.W.T @ grad_output
+
+        if self.input_ndim == 2:
+            if grad_output.ndim == 3:
+                grad_output = grad_output.reshape(grad_output.shape[0], grad_output.shape[1])
+            self.grad_W[:] = grad_output.T @ self.x
+            self.grad_b[:] = np.sum(grad_output, axis=0).reshape(self.output_size, 1)
+            return grad_output @ self.W
+
+        raise ValueError(f"Unexpected gradient shape for layer: {grad_output.shape}")
 
 
