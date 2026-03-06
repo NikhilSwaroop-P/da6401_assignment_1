@@ -20,17 +20,11 @@ from ann.neural_network import NeuralNetwork
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run inference on test set')
-    parser = argparse.ArgumentParser()
 
-    parser.add_argument("-d","--dataset",
-    choices=["mnist","fashion_mnist"],
-    required=True)
-
-    parser.add_argument("--model_path", required=True)
-
-    parser.add_argument("--config_path", required=True)
-
-    parser.add_argument("-b","--batch_size", type=int, default=128)
+    parser.add_argument("-d", "--dataset", choices=["mnist", "fashion_mnist"], default="mnist")
+    parser.add_argument("--model_path", default="best_model.npy")
+    parser.add_argument("--config_path", default="best_config.json")
+    parser.add_argument("-b", "--batch_size", type=int, default=128)
     return parser.parse_args()
 
 

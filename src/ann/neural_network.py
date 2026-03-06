@@ -14,7 +14,6 @@ except Exception:
         from utils.data_loader import Dataloader
     except Exception:
         from da6401_assignment_1.src.ann.optimizers import NAG, get_optimiser
-        from da6401_assignment_1.src.utils.data_loader import Dataloader
 
 from .neural_layer import NeuralLayer
 from .activations import get_activation
@@ -184,8 +183,8 @@ class NeuralNetwork:
         y_pred_logits = self.forward(X)
         loss = self.loss_fn.forward(y, y_pred_logits)
         # Compute accuracy and F1 score (implementation depends on specific requirements)
-        y_pred = np.argmax(y_pred_logits, axis=1)
-        y_true = np.argmax(y, axis=1)
+        y_pred = np.argmax(y_pred_logits, axis=1).reshape(-1)
+        y_true = np.argmax(y, axis=1).reshape(-1)
         accuracy = np.mean(y_pred == y_true)
         from sklearn.metrics import f1_score
         f1 = f1_score(y_true, y_pred, average='macro')
@@ -219,7 +218,7 @@ class NeuralNetwork:
     def get_weights(self):
         d = {}
         for i, layer in enumerate(self.layers):
-            d[f"W{i}"] = layer.W.copy()
+            d[f"W{i}"] = layer.W.T.copy()
             d[f"b{i}"] = layer.b.copy()
         return d
 
@@ -228,6 +227,10 @@ class NeuralNetwork:
             w_key = f"W{i}"
             b_key = f"b{i}"
             if w_key in weight_dict:
-                layer.W[:] = weight_dict[w_key].copy()
-            if b_key in weight_dict:
-                layer.b[:] = weight_dict[b_key].copy()
+                incoming_w = weight_dict[w_key]
+                if incoming_w.shape == layer.W.shape:
+                    layer.W[:] = incoming_w.copy()
+                elif incoming_w.shape == layer.W.T.shape:
+                    layer.W[:] = incoming_w.T.copy()
+                else:
+                    raise ValueError(f"Unexpected shape for {w_key}: {incoming_w.shape}, expected {layer.W.shape} or {layer.W.T.shape}")
