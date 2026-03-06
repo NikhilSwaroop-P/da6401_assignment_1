@@ -2,12 +2,22 @@
 Main Neural Network Model class
 Handles forward and backward propagation loops
 """
-from ann.optimizers import NAG, get_optimiser
-from utils.data_loader import Dataloader
+import numpy as np
+
+# Robust imports: try package-relative, then src-root, then project-root absolute
+try:
+    from .optimizers import NAG, get_optimiser
+    from ..utils.data_loader import Dataloader
+except Exception:
+    try:
+        from ann.optimizers import NAG, get_optimiser
+        from utils.data_loader import Dataloader
+    except Exception:
+        from da6401_assignment_1.src.ann.optimizers import NAG, get_optimiser
+        from da6401_assignment_1.src.utils.data_loader import Dataloader
 
 from .neural_layer import NeuralLayer
 from .activations import get_activation
-import numpy as np
 from .objective_functions import CrossEntropyLoss, MSELoss
 
 def _cfg(cli_args):

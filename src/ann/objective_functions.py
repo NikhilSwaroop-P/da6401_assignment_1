@@ -4,7 +4,13 @@ Implements: Cross-Entropy, Mean Squared Error (MSE)
 """
 import numpy as np
 
-from da6401_assignment_1.src.ann.activations import Softmax
+try:
+    from .activations import Softmax
+except Exception:
+    try:
+        from ann.activations import Softmax
+    except Exception:
+        from da6401_assignment_1.src.ann.activations import Softmax
 
 class CrossEntropyLoss:
     def __init__(self):
