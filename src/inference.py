@@ -102,7 +102,10 @@ def main():
     "optimizer": None,
 }
     model = NeuralNetwork(model_cfg)
-    model.set_weights(weights)
+    try:
+        model.set_weights(weights)
+    except:
+        raise ValueError(f"Error in setting weights{model_cfg}, {config}")
 
     # Evaluate
     results = evaluate_model(model, X_test, y_test)
