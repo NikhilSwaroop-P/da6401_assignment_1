@@ -3,6 +3,7 @@ Main Neural Network Model class
 Handles forward and backward propagation loops
 """
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 try:
     from .optimizers import NAG, get_optimiser
@@ -188,11 +189,15 @@ class NeuralNetwork:
         else:
             self.optimizer.step(self.global_weights, self.global_grad)
 
-    def train(self, X_train, y_train, epochs, batch_size):
+    def train(self, X_train, y_train, epochs, batch_size, eval_mode = False):
         """
         Train the network for specified epochs.
         """
+        if eval_mode:
+            X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.1, random_state=42)
         num_samples = X_train.shape[0]
+        best_val_f1 = -1
+        best_weights = None
         for epoch in range(epochs):
             print(f"Epoch {epoch+1}/{epochs}")
             loss_epoch = 0.0
@@ -207,6 +212,13 @@ class NeuralNetwork:
             loss_epoch /= (num_samples / batch_size)
             
             print(f"Loss for epoch {epoch+1}: {loss_epoch:.6f}")
+            if eval_mode:
+                val_acc, val_f1 = self.evaluate(X_val, y_val)
+                print(f"Validation Accuracy: {val_acc:.4f}, Validation F1: {val_f1:.4f}")
+                if val_f1 > best_val_f1:
+                    best_val_f1 = val_f1
+                    best_weights = self.get_weights()
+        return best_weights, val_acc, val_f1 if eval_mode else None
 
     def evaluate(self, X, y):
         """
@@ -261,6 +273,7 @@ class NeuralNetwork:
                 layer.grad_W = self.global_grad[idx:idx+w_size].reshape(layer.grad_W.shape)
                 layer.grad_b = self.global_grad[idx+w_size:idx+w_size+b_size].reshape(layer.grad_b.shape)
                 idx += w_size + b_size
+    
     def sync_global_to_local(self):
         self._assign_global_params()
 

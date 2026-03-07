@@ -111,14 +111,17 @@ def main():
     # args.hidden_sizes = args.hidden_size if hasattr(args,"hidden_size") else args.sz
     model = NeuralNetwork(args)
     print("Starting training...")
-    model.train(X_train, y_train, args.epochs, args.batch_size)
-
+    results = model.train(X_train, y_train, args.epochs, args.batch_size, eval_mode=True)
+    if results:
+        best_weights, val_acc, val_f1 = results
+        print(f"Final Validation Accuracy: {val_acc:.4f}, Final Validation F1: {val_f1:.4f}")
     # train_acc, train_f1 = model.evaluate(X_train, y_train)
+    model.set_weights(best_weights)
     test_acc, test_f1 = model.evaluate(X_test, y_test)
     if test_f1 > best_f1:
         best_f1 = test_f1
         model_data = {
-            "weights": model.get_weights(),
+            "weights": best_weights,
             "config": {
                 "hidden_size": args.hidden_size,
                 "activation": args.activation,
