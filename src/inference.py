@@ -29,8 +29,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Run inference on test set')
 
     parser.add_argument("-d", "--dataset", choices=["mnist", "fashion_mnist"], default=None)
-    parser.add_argument("--model_path", default="best_model.npy")
-    parser.add_argument("--config_path", default="best_config.json")
+    parser.add_argument("--model_path", default="src/best_model.npy")
+    parser.add_argument("--config_path", default="src/best_config.json")
     parser.add_argument("-b", "--batch_size", type=int, default=128)
     return parser.parse_args()
 

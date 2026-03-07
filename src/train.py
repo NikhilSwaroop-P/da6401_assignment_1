@@ -70,8 +70,8 @@ def parse_arguments():
     parser.add_argument("-a", "--activation", choices=["relu", "sigmoid", "tanh"], required=True)
     parser.add_argument("-w_i", "--weight_init", choices=["random", "xavier"], required=True)
     parser.add_argument("-w_p", "--wandb_project", default="DA6401_assignement1")
-    parser.add_argument("--model_save_path", default="best_model.npy")
-    parser.add_argument("--config_save_path", default="best_config.json")
+    parser.add_argument("--model_save_path", default="src/best_model.npy")
+    parser.add_argument("--config_save_path", default="src/best_config.json")
     parser.add_argument(
         "--overwrite_if_worse",
         action="store_true",
