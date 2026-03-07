@@ -17,8 +17,13 @@ from .neural_layer import NeuralLayer
 from .activations import get_activation
 from .objective_functions import CrossEntropyLoss, MSELoss
 import json
+
 def _cfg(cli_args):
-    return cli_args if isinstance(cli_args, dict) else vars(cli_args)
+    if isinstance(cli_args, dict):
+        return cli_args
+    else:
+        cli_args = vars(cli_args)
+    return cli_args
 
 class NeuralNetwork:
     """
@@ -131,11 +136,6 @@ class NeuralNetwork:
         Returns:
             Output logits
         """
-        # Y = []
-        # for x in X:
-        #     for layer in self.layers:
-        #         x = layer.forward(x)
-        #     Y.append(x)
         self.past_input = X
         for layer in self.full_layers:
             X = layer.forward(X)
@@ -158,17 +158,16 @@ class NeuralNetwork:
         grad_output = self.loss_fn.backward(y_true, y_pred)    
         for layer in reversed(self.full_layers):
             grad_output = layer.backward(grad_output)
-            if isinstance(layer, NeuralLayer):
+            if isinstance(layer,NeuralLayer):
                 grad_W_list.append(layer.grad_W)
                 grad_b_list.append(layer.grad_b)
-        # Backprop traverses layers in reverse; return grads in forward layer order (W0, W1, ...)
+        
         grad_W_list.reverse()
         grad_b_list.reverse()
-        # return [layer.grad_W for layer in self.full_layers if isinstance(layer, NeuralLayer)], [layer.grad_b for layer in self.full_layers if isinstance(layer, NeuralLayer)]
         
         self.grad_W = np.empty(len(grad_W_list), dtype=object)
         self.grad_b = np.empty(len(grad_b_list), dtype=object)
-        for i , (gw, gb) in enumerate(zip(grad_W_list, grad_b_list)):
+        for i, (gw, gb) in enumerate(zip(grad_W_list, grad_b_list)):
             self.grad_W[i] = gw
             self.grad_b[i] = gb
         # print("Shape of grad_Ws:", self.grad_W.shape, self.grad_W[1].shape)

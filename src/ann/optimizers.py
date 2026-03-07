@@ -37,14 +37,7 @@ class NAG:
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.v = None
-    
-    # def step(self, weights, gradients):
-    #     if self.v is None:
-    #         self.v = np.zeros_like(weights)
-    #     self.v = self.momentum * self.v + self.learning_rate * gradients
-    #     nestrov_update = self.momentum*self.v + self.learning_rate*gradients
-    #     weights -= nestrov_update
-
+        
     def step(self, weights, new_gradients):
         if self.v is None:
             self.v = np.zeros_like(weights)

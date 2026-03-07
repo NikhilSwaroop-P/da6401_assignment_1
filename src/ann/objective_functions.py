@@ -18,7 +18,7 @@ class CrossEntropyLoss:
         self.softmax = Softmax()
     
     def forward(self, y_true, y_pred_logits):
-        # Apply softmax to logits
+
         y_pred = self.softmax.forward(y_pred_logits)
         self.y_pred = y_pred
         return -np.mean(np.sum(y_true * np.log(y_pred + 1e-12), axis=1))
