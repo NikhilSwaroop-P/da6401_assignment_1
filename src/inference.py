@@ -21,7 +21,7 @@ from ann.neural_network import NeuralNetwork
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run inference on test set')
 
-    parser.add_argument("-d", "--dataset", choices=["mnist", "fashion_mnist"], default="mnist")
+    parser.add_argument("-d", "--dataset", choices=["mnist", "fashion_mnist"], default=None)
     parser.add_argument("--model_path", default="src/best_model.npy")
     parser.add_argument("--config_path", default="src/best_config.json")
     parser.add_argument("-b", "--batch_size", type=int, default=128)
@@ -75,15 +75,18 @@ def main():
     TODO: Must return Dictionary - logits, loss, accuracy, f1, precision, recall
     """
     args = parse_arguments()
-    # Load dataset
-    _, _, X_test, y_test = load_data(args.dataset)
-
-    # Load saved weights (expected to be a dict of W0,b0,...)
-    weights = load_model(args.model_path)
 
     # Load config JSON (dictionary with keys: hidden_size, activation, loss, weight_init, etc.)
     with open(args.config_path, "r") as f:
         config = json.load(f)
+
+    dataset_name = args.dataset if args.dataset is not None else config.get("dataset", "mnist")
+
+    # Load dataset
+    _, _, X_test, y_test = load_data(dataset_name)
+
+    # Load saved weights (expected to be a dict of W0,b0,...)
+    weights = load_model(args.model_path)
 
     model_cfg = {
     "hidden_size": config.get("hidden_size", []),
@@ -102,6 +105,7 @@ def main():
     results = evaluate_model(model, X_test, y_test)
 
     print("Evaluation Results:")
+    print(f"Dataset: {dataset_name}")
     print(f"Loss: {results['loss']:.4f}")
     print(f"Accuracy: {results['accuracy']:.4f}")
     print(f"Precision: {results['precision']:.4f}")

@@ -108,8 +108,8 @@ def main():
                 "output_size": model.output_size,
                 # 'train_accuracy': train_acc,
                 # 'train_f1': train_f1,
-                # 'test_accuracy': test_acc,
-                # 'test_f1': test_f1
+                'test_accuracy': test_acc,
+                'test_f1': test_f1
             }
         }
     model_dir = os.path.dirname(args.model_save_path)
