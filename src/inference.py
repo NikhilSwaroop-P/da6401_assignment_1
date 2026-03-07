@@ -22,8 +22,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser(description='Run inference on test set')
 
     parser.add_argument("-d", "--dataset", choices=["mnist", "fashion_mnist"], default="mnist")
-    parser.add_argument("--model_path", default="/src/best_model.npy")
-    parser.add_argument("--config_path", default="/src/best_config.json")
+    parser.add_argument("--model_path", default="src/best_model.npy")
+    parser.add_argument("--config_path", default="src/best_config.json")
     parser.add_argument("-b", "--batch_size", type=int, default=128)
     return parser.parse_args()
 
@@ -95,10 +95,8 @@ def main():
     "optimizer": None,
 }
     model = NeuralNetwork(model_cfg)
-    try:
-        model.set_weights(weights)
-    except:
-        raise ValueError(f"Error in setting weights{model_cfg}, {config}")
+
+    model.set_weights(weights)
 
     # Evaluate
     results = evaluate_model(model, X_test, y_test)
