@@ -67,7 +67,7 @@ class CrossEntropyLoss:
         loss = -np.sum(y_true * log_probs) / logits.shape[0]
         return loss
 
-    def backward(self):
+    def backward(self, logits, y_true):
         return (self.probabilities - self.y_true) / self.y_true.shape[0]
 
 
@@ -84,7 +84,7 @@ class MSELoss:
         loss = np.mean((self.probabilities - y_true) ** 2)
         return loss
 
-    def backward(self):
+    def backward(self, logits, y_true):
         batch = self.y_true.shape[0]
         num_classes = self.y_true.shape[1]
         grad_prob = 2.0 * (self.probabilities - self.y_true) / (batch * num_classes)
