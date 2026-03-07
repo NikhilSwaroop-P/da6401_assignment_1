@@ -85,7 +85,7 @@ def main():
     # args.hidden_sizes = args.hidden_size if hasattr(args,"hidden_size") else args.sz
     model = NeuralNetwork(args)
     print("Starting training...")
-    model.train(X_train, y_train, args.epochs, args.batch_size)
+    # model.train(X_train, y_train, args.epochs, args.batch_size)
 
     # train_acc, train_f1 = model.evaluate(X_train, y_train)
     test_acc, test_f1 = model.evaluate(X_test, y_test)
