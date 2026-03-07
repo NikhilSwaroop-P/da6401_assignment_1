@@ -18,12 +18,19 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from utils.data_loader import load_data
 from ann.neural_network import NeuralNetwork
 
+
+def _resolve_path(path_value):
+    """Resolve relative paths against this script's directory for CWD-independent behavior."""
+    if os.path.isabs(path_value):
+        return path_value
+    return os.path.join(this, path_value)
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Run inference on test set')
 
     parser.add_argument("-d", "--dataset", choices=["mnist", "fashion_mnist"], default=None)
-    parser.add_argument("--model_path", default="src/best_model.npy")
-    parser.add_argument("--config_path", default="src/best_config.json")
+    parser.add_argument("--model_path", default="best_model.npy")
+    parser.add_argument("--config_path", default="best_config.json")
     parser.add_argument("-b", "--batch_size", type=int, default=128)
     return parser.parse_args()
 
@@ -32,7 +39,14 @@ def load_model(model_path):
     """
     Load trained model from disk.
     """
-    return np.load(model_path, allow_pickle=True).item()
+    loaded = np.load(model_path, allow_pickle=True)
+    if isinstance(loaded, np.ndarray) and loaded.shape == ():
+        loaded = loaded.item()
+    if not isinstance(loaded, dict):
+        raise ValueError(
+            "Expected saved model as a dict of weight tensors (W0, b0, ...)."
+        )
+    return loaded
 
 
 def evaluate_model(model, X_test, y_test): 
@@ -52,9 +66,9 @@ def evaluate_model(model, X_test, y_test):
     loss = model.loss_fn.forward(y_test, logits)
 
     accuracy = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred, average="macro")
-    recall = recall_score(y_true, y_pred, average="macro")
-    f1 = f1_score(y_true, y_pred, average="macro")
+    precision = precision_score(y_true, y_pred, average="macro", zero_division=0)
+    recall = recall_score(y_true, y_pred, average="macro", zero_division=0)
+    f1 = f1_score(y_true, y_pred, average="macro", zero_division=0)
     cm = confusion_matrix(y_true, y_pred)
     
     return {
@@ -75,6 +89,8 @@ def main():
     TODO: Must return Dictionary - logits, loss, accuracy, f1, precision, recall
     """
     args = parse_arguments()
+    args.model_path = _resolve_path(args.model_path)
+    args.config_path = _resolve_path(args.config_path)
 
     # Load config JSON (dictionary with keys: hidden_size, activation, loss, weight_init, etc.)
     with open(args.config_path, "r") as f:

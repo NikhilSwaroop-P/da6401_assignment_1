@@ -19,6 +19,25 @@ from utils.data_loader import load_data
 from ann.neural_network import NeuralNetwork
 from ann.optimizers import SGD, RMSProp, Momentum, NAG
 
+
+def _resolve_path(path_value):
+    """Resolve relative paths against this script's directory for CWD-independent behavior."""
+    if os.path.isabs(path_value):
+        return path_value
+    return os.path.join(this, path_value)
+
+
+def _read_existing_best_f1(config_path):
+    """Read prior saved test F1 if present; return -inf when unavailable."""
+    if not os.path.exists(config_path):
+        return float("-inf")
+    try:
+        with open(config_path, "r") as f:
+            cfg = json.load(f)
+        return float(cfg.get("test_f1", float("-inf")))
+    except Exception:
+        return float("-inf")
+
 def parse_arguments():
     
     parser = argparse.ArgumentParser(description='Train a neural network')
@@ -51,8 +70,13 @@ def parse_arguments():
     parser.add_argument("-a", "--activation", choices=["relu", "sigmoid", "tanh"], required=True)
     parser.add_argument("-w_i", "--weight_init", choices=["random", "xavier"], required=True)
     parser.add_argument("-w_p", "--wandb_project", default="DA6401_assignement1")
-    parser.add_argument("--model_save_path", default="src/best_model.npy")
-    parser.add_argument("--config_save_path", default="src/best_config.json")
+    parser.add_argument("--model_save_path", default="best_model.npy")
+    parser.add_argument("--config_save_path", default="best_config.json")
+    parser.add_argument(
+        "--overwrite_if_worse",
+        action="store_true",
+        help="Overwrite existing artifacts even when current test_f1 is lower.",
+    )
     
     return parser.parse_args()
 
@@ -63,6 +87,8 @@ def main():
     """
     best_f1 = -1
     args = parse_arguments()
+    args.model_save_path = _resolve_path(args.model_save_path)
+    args.config_save_path = _resolve_path(args.config_save_path)
     optimizer_name = args.optimizer
     if args.num_layers != len(args.hidden_size):
         raise ValueError("num_layers must match length of hidden_size list")
@@ -85,7 +111,7 @@ def main():
     # args.hidden_sizes = args.hidden_size if hasattr(args,"hidden_size") else args.sz
     model = NeuralNetwork(args)
     print("Starting training...")
-    # model.train(X_train, y_train, args.epochs, args.batch_size)
+    model.train(X_train, y_train, args.epochs, args.batch_size)
 
     # train_acc, train_f1 = model.evaluate(X_train, y_train)
     test_acc, test_f1 = model.evaluate(X_test, y_test)
@@ -112,6 +138,9 @@ def main():
                 'test_f1': test_f1
             }
         }
+    previous_best_f1 = _read_existing_best_f1(args.config_save_path)
+    should_save = args.overwrite_if_worse or (test_f1 >= previous_best_f1)
+
     model_dir = os.path.dirname(args.model_save_path)
     if model_dir:
         os.makedirs(model_dir, exist_ok=True)
@@ -119,10 +148,19 @@ def main():
     if config_dir:
         os.makedirs(config_dir, exist_ok=True)
 
-    np.save(args.model_save_path, model_data["weights"])
-
-    with open(args.config_save_path, "w") as f:
-        json.dump(model_data["config"], f)
+    if should_save:
+        np.save(args.model_save_path, model_data["weights"])
+        with open(args.config_save_path, "w") as f:
+            json.dump(model_data["config"], f)
+        print(
+            f"Saved model/config to {args.model_save_path} and {args.config_save_path} "
+            f"(test_f1={test_f1:.4f}, previous_best_f1={previous_best_f1:.4f})"
+        )
+    else:
+        print(
+            f"Skipped saving because current test_f1={test_f1:.4f} < previous_best_f1={previous_best_f1:.4f}. "
+            "Use --overwrite_if_worse to force save."
+        )
 
       
     print("Training complete!")
