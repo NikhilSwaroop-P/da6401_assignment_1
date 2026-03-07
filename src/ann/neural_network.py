@@ -267,8 +267,11 @@ class NeuralNetwork:
                 elif incoming_b.shape == layer.b.reshape(-1).shape:
                     layer.b[:] = incoming_b.reshape(layer.b.shape).copy()
                 else:
+                    hidden_size = []
+                    for b_key in weight_dict:
+                        hidden_size.append((b_key,weight_dict[b_key].shape[0]))
                     raise ValueError(
-                        f"Unexpected for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}, cli_args{self.cfg_args}"
+                        f"Unexpected for {b_key}: {incoming_b.shape}, expected {layer.b.shape}, {layer.b.T.shape}, or {layer.b.reshape(-1).shape}, cli_args{self.cfg_args}, hidden_size{hidden_size}"
                     )
 
             if w_key in weight_dict:
