@@ -89,7 +89,6 @@ def main():
 
     # train_acc, train_f1 = model.evaluate(X_train, y_train)
     test_acc, test_f1 = model.evaluate(X_test, y_test)
-    test_f1 = 0
     if test_f1 > best_f1:
         best_f1 = test_f1
         model_data = {
@@ -113,6 +112,13 @@ def main():
                 # 'test_f1': test_f1
             }
         }
+    model_dir = os.path.dirname(args.model_save_path)
+    if model_dir:
+        os.makedirs(model_dir, exist_ok=True)
+    config_dir = os.path.dirname(args.config_save_path)
+    if config_dir:
+        os.makedirs(config_dir, exist_ok=True)
+
     np.save(args.model_save_path, model_data["weights"])
 
     with open(args.config_save_path, "w") as f:

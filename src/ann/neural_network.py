@@ -212,12 +212,30 @@ class NeuralNetwork:
         """
         Evaluate the network on given data. Return accuracy and F1 score.
         """
+        def _to_class_indices(arr):
+            arr = np.asarray(arr)
+
+            # Handle common (N, C, 1) / (N, 1) shapes used in this project.
+            if arr.ndim > 1 and arr.shape[-1] == 1:
+                arr = np.squeeze(arr, axis=-1)
+            if arr.ndim > 1 and arr.shape[1] == 1:
+                arr = np.squeeze(arr, axis=1)
+
+            if arr.ndim == 1:
+                return arr.astype(np.int64)
+            if arr.ndim == 2:
+                if arr.shape[1] == 1:
+                    return arr.reshape(-1).astype(np.int64)
+                return np.argmax(arr, axis=1).reshape(-1)
+
+            raise ValueError(f"Unsupported label/logit shape for evaluation: {arr.shape}")
+
         y_pred_logits = self.forward(X)
-        y_pred = np.argmax(y_pred_logits, axis=1).reshape(-1)
-        y_true = np.argmax(y, axis=1).reshape(-1)
+        y_pred = _to_class_indices(y_pred_logits)
+        y_true = _to_class_indices(y)
         accuracy = np.mean(y_pred == y_true)
         from sklearn.metrics import f1_score
-        f1 = f1_score(y_true, y_pred, average="macro")
+        f1 = f1_score(y_true, y_pred, average="macro", zero_division=0)
         return accuracy, f1
     
     def _assign_global_params(self):
