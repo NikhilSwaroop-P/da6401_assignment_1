@@ -37,7 +37,7 @@ class NAG:
         self.momentum = momentum
         self.weight_decay = weight_decay
         self.v = None
-        
+
     def step(self, weights, new_gradients):
         if self.v is None:
             self.v = np.zeros_like(weights)
@@ -58,13 +58,13 @@ class RMSProp:
         self.beta = beta
         self.epsilon = epsilon
         self.weight_decay = weight_decay
-        self.s = None
+        self.squared = None
     
     def step(self, weights, gradients):
-        if self.s is None:
-            self.s = np.zeros_like(weights)
-        self.s = self.beta * self.s + (1 - self.beta) * np.square(gradients)
-        weights -= self.learning_rate * gradients / (np.sqrt(self.s) + self.epsilon)
+        if self.squared is None:
+            self.squared = np.zeros_like(weights)
+        self.squared = self.beta * self.squared + (1 - self.beta) * np.square(gradients)
+        weights -= self.learning_rate * gradients / (np.sqrt(self.squared) + self.epsilon)
         weights -= self.weight_decay * weights * self.learning_rate
 
 class Adam:
