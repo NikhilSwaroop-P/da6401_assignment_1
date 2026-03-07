@@ -57,8 +57,10 @@ def load_data(dataset_name):
         (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
     else:
         raise ValueError("Invalid dataset name")
-    x_train = x_train.astype(np.float32).reshape(x_train.shape[0], -1, 1) / 255.0
-    x_test = x_test.astype(np.float32).reshape(x_test.shape[0], -1, 1) / 255.0
+    # x_train = x_train.astype(np.float32).reshape(x_train.shape[0], -1, 1) / 255.0
+    # x_test = x_test.astype(np.float32).reshape(x_test.shape[0], -1, 1) / 255.0
+    x_train = x_train.astype(np.float32).reshape(x_train.shape[0], -1, 1)
+    x_test = x_test.astype(np.float32).reshape(x_test.shape[0], -1, 1)
     y_train = _one_hot(y_train).reshape(y_train.shape[0], 10, 1)
     y_test = _one_hot(y_test).reshape(y_test.shape[0], 10, 1)
     return x_train, y_train, x_test, y_test
