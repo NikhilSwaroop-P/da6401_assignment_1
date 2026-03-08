@@ -154,6 +154,7 @@ class NeuralNetwork:
         """
         grad_W_list = []
         grad_b_list = []
+        y_true = self._ensure_one_hot(y_true)
         self.ytrue = y_true
         grad_output = self.loss_fn.backward(y_true, y_pred)    
         for layer in reversed(self.full_layers):
@@ -282,7 +283,11 @@ class NeuralNetwork:
             d[f"W{i}"] = layer.W.copy()
             d[f"b{i}"] = layer.b.copy()
         return d
-
+    
+    def _ensure_one_hot(self, y):
+        if y.ndim == 1:
+            y = np.eye(np.max(y) + 1)[y]
+        return y
     def set_weights(self, weight_dict):
         for i, layer in enumerate(self.layers):
             w_key = f"W{i}"
